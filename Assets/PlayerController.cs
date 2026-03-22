@@ -29,7 +29,7 @@ public class PlayerController : MonoBehaviour
 
     Vector3 pos = transform.position;
     //Mathf.Clamp(値,最小値,最大値) 値を範囲内に収める
-    pos.x = Mathf.Clamp(pos.x, -11f, 11f);
+    pos.x = Mathf.Clamp(pos.x, -16f, 16f);
     pos.y = Mathf.Clamp(pos.y, -4.5f, 4.5f);
     transform.position = pos;
   }
@@ -38,12 +38,47 @@ public class PlayerController : MonoBehaviour
   {
     while(true)
     {
-      //instatiate(生成するPrefab, 生成する位置, 向き)
-      GameObject bullet = Instantiate(playerBulletPrefab, transform.position, Quaternion.identity);
-      Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
-      rb.linearVelocity = new Vector2(0f, 5f);
+      if(nearestEnemy != null)
+      {
+        //Vector3-型-xyzの３D座標　　Camera.main-メインカメラを取得　　ScreenToWorldPoint-スクリーン座標をワールド座標に変換
+        //Input.mousePosition-マウスのスクリーン座標を取得
+        //型 変数名 = Camera.main.ScreenToWorldPoint(スクリーン座標);
+        //マウスのスクリーン座標をゲーム上の座標に変換して、mousePosというVector3型の変数に入れてね
+        //Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        //mousePos.z = 0f;
+        //normalized-ベクトルの長さを1に統一  GameObject-型 
+        //マウスの座標からplayerの座標を引いて傾きを求める。それの速さを変えないためにnarmalizedでベクトルを固定
+        //Vector2 direction = (mousePos - transform.position).normalized;
+        //Instatiate-関数
+        //instatiate(生成するprefab, 生成する位置, 向き)
+        GameObject bullet = Instantiate(playerBulletPrefab, transform.position, Quaternion.identity);
+        //RigidBody-関数  GetComponent-関数-コンポーネントを取得
+        Rigidbody2D bulletRb = bullet.GetComponent<Rigidbody2D>();
+        //linearVelocity-プロパティ-物理的な移動速度
+        bulletRb.linearVelocity = direction * 30f;
+      }
       yield return new WaitForSeconds(fireRate);
     }
+  }
+
+  //一番近い敵を探すメソッド
+  GameObject FindNearestEnemy()
+  {
+    GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+
+    GameObject nearest = null;
+    float minDistance = Mathf.Infinity;
+
+    foreach(GameObject enemy in enemies)
+    {
+      float distance = Vector2.Distance(transform.position, enemy.transform.position);
+      if(distance < minDistance)
+      {
+        minDistance = distance;
+        nearest = nenmy;
+      }
+    }
+    return nearest;
   }
 
   //当たり判定

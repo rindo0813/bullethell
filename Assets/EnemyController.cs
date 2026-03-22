@@ -10,6 +10,10 @@ public class EnemyController : MonoBehaviour
   public float moveRange = 3f;
   private float startX;
 
+  //HP関連
+  public int maxHP = 5;
+  private int currentHP;
+
   void Start()
   {
     //transform.position→このオブジェクトの今の①
@@ -17,6 +21,9 @@ public class EnemyController : MonoBehaviour
     //startcoroutine→繰り返し処理の開始用
     //start関数が終わったとしてもStartCoroutineこれの引数は起動し続ける
     StartCoroutine(FireBullet());
+
+    //HPを最大にセット
+    currentHP = maxHP;
   }
 
   void Update()
@@ -26,6 +33,29 @@ public class EnemyController : MonoBehaviour
     float x = startX + Mathf.Sin(Time.time * moveSpeed) * moveRange;
     //transformは３Dで管理されてるからvector3にしないといけない
     transform.position = new Vector3(x, transform.position.y,0);
+  }
+  //触れた瞬間に勝手に発動する→OnTriggerEnter2D　otherのなかに触れたものの情報が
+  void OnTriggerEnter2D(Collider2D other)
+  {
+    if(other.CompareTag("PlayerBullet"))
+    {
+      //unityに決められた関数 Destroy(○○)→　○○を消す
+      Destroy(other.gameObject);
+      TakeDamage(1);
+    }
+  }
+
+  //ダメージと残りHPの計算
+  void TakeDamage(int damage)
+  {
+    currentHP -=damage;
+
+    if(currentHP <= 0)
+    {
+      //敵が１体倒されたと報告するようなイメージ
+      FindObjectOfType<WaveManager>().OnEnemyDefeated();
+      Destroy(gameObject);
+    }
   }
 
   System.Collections.IEnumerator FireBullet()
